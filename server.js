@@ -1,19 +1,15 @@
 // =================== EXPENSE TRACKER BACKEND ===================
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
 const app = express();
- HEAD
-app.use(cors()); // allow requests from any origin (GitHub Pages frontend)
+app.use(cors());
 app.use(express.json());
 
 // =================== MONGODB CONNECTION ===================
-// Using your Atlas connection string
+// Replace password with URL-encoded version (G@nesh123 -> G%40nesh123)
 const MONGODB_URI = "mongodb+srv://ganeshnelwade773_db_user:G%40nesh123@cluster0.tdzkdvt.mongodb.net/expenses?retryWrites=true&w=majority";
-
-
 
 mongoose.connect(MONGODB_URI)
   .then(() => console.log("MongoDB connected successfully"))
@@ -57,4 +53,3 @@ app.get("/expenses", async (req, res) => {
 // =================== START SERVER ===================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
