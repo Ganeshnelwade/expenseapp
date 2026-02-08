@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -164,3 +165,171 @@ loadExpenses();
 
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker - Cloud</title>
+
+<!-- jsPDF + autoTable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h1 { text-align: center; }
+input, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+button {
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+}
+button:hover { background-color: #555; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+th { background: #333; color: white; }
+#total { margin-top: 10px; font-weight: bold; text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Cloud Expense Tracker</h1>
+
+<!-- Expense Form -->
+<div>
+    <input type="date" id="date">
+    <input type="text" id="category" placeholder="Category">
+    <input type="number" id="amount" placeholder="Amount">
+    <input type="text" id="note" placeholder="Note">
+    <button onclick="addExpense()">Add Expense</button>
+</div>
+
+<!-- Expense Table -->
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Note</th>
+        </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+</table>
+
+<h3 id="total">Total: 0</h3>
+<button onclick="generatePDF()">Download PDF Report</button>
+</div>
+
+<script>
+const API = "http://localhost:5000/expenses"; // Change to your Render URL after deployment
+let expenses = [];
+
+// Fetch all expenses from backend
+function loadExpenses() {
+    fetch(API)
+        .then(res => res.json())
+        .then(data => {
+            expenses = data;
+            renderTable();
+        })
+        .catch(err => console.error(err));
+}
+
+// Add a new expense
+function addExpense() {
+    const date = document.getElementById("date").value;
+    const category = document.getElementById("category").value;
+    const amount = Number(document.getElementById("amount").value);
+    const note = document.getElementById("note").value;
+
+    if (!date || !category || !amount) {
+        alert("Date, Category, and Amount are required!");
+        return;
+    }
+
+    fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, category, amount, note })
+    })
+    .then(() => {
+        document.getElementById("date").value = "";
+        document.getElementById("category").value = "";
+        document.getElementById("amount").value = "";
+        document.getElementById("note").value = "";
+        loadExpenses();
+    })
+    .catch(err => console.error(err));
+}
+
+// Render table and total
+function renderTable() {
+    const tableBody = document.getElementById("table-body");
+    tableBody.innerHTML = "";
+    let total = 0;
+
+    expenses.forEach(e => {
+        total += e.amount;
+        tableBody.innerHTML += `
+            <tr>
+                <td>${e.date}</td>
+                <td>${e.category}</td>
+                <td>${e.amount}</td>
+                <td>${e.note || ""}</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("total").innerText = "Total: " + total;
+}
+
+// Generate PDF report
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("Expense Report", 14, 15);
+
+    const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+    // AutoTable
+    doc.autoTable({
+        startY: 25,
+        head: [["Date","Category","Amount","Note"]],
+        body: expenses.map(e => [e.date,e.category,e.amount,e.note || ""]),
+        theme: "grid"
+    });
+
+    doc.text(`Total: ${totalAmount}`, 14, doc.lastAutoTable.finalY + 10);
+    doc.save("Expense_Report.pdf");
+}
+
+// Initial load
+loadExpenses();
+</script>
+
+</body>
+</html>
+>>>>>>> b2d55ab3a86c42bcfabca496e6cde4b61b8de03f
